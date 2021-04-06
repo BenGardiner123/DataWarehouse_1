@@ -22,7 +22,7 @@ drop table IF EXISTS DWDATE;
 GO
 
 
-CREATE TABLE	DWDATE
+CREATE TABLE DWDATE
 	(	DateKey Integer primary key, 
 		Datevalue DATE,
 		DayOfMonth integer, -- Field will hold day number of Month
@@ -1150,25 +1150,35 @@ insert into dwdate ( datekey, datevalue, dayofmonth, daysuffix, dayname, dayshor
  (1094, convert(date, '30/12/2015', 103), 30, 'th', 'Wednesday', 'Wed', 4, 91, 364, 53, 12, 'December', 'Dec', 3, 4, 'Fourth', 2015, convert(date, '01/12/2015', 103), convert(date, '31/12/2015', 103), convert(date, '01/10/2015',103), convert(date, '31/12/2015', 103), convert(date, '01/01/2015', 103), convert(date, '31/12/2015', 103), 1),
  (1095, convert(date, '31/12/2015', 103), 31, 'st', 'Thursday', 'Thu', 5, 92, 365, 53, 12, 'December', 'Dec', 3, 4, 'Fourth', 2015, convert(date, '01/12/2015', 103), convert(date, '31/12/2015', 103), convert(date, '01/10/2015',103), convert(date, '31/12/2015', 103), convert(date, '01/01/2015', 103), convert(date, '31/12/2015', 103), 1);
 
- GO
+GO
+
+drop table IF EXISTS [DWPROD];
+
+GO
 
  CREATE TABLE [dbo].[DWPROD] (
-    [DWPRODID]         INT IDENTITY(1,1) NOT NULL,
+    [DWPRODID]         INT IDENTITY(5000,1) NOT NULL,
 	[DWSOURCETABLE]    NVARCHAR (100)    NOT NULL,
 	[DWSOURCEID]       INT				 NOT NULL,
     PRODNAME           NVARCHAR (100)	 NULL,
-    PRODCATNAME        INT				 NULL,
-    PRODMANUNAME       INT				 NULL,
-    PRODSHIPNAME	   INT				 NULL,
-
+    PRODCATNAME        NVARCHAR (100)	 NULL,
+    PRODMANUNAME       NVARCHAR (30)	 NULL,
+    PRODSHIPNAME	   NVARCHAR (30)	 NULL,
+	CONSTRAINT [Pk_dwprodid] PRIMARY KEY CLUSTERED ([DWPRODID] ASC),
+	
 );
+--(5001, 'PRODUCT', '10732', 'NAVEL BOOK PRO', 3, 'Samdanced', 'EXPRESS OVERNIGHT')
+
+GO
+
+drop table IF EXISTS [DWCUST];
 
 GO
 
  CREATE TABLE [dbo].[DWCUST] (
-    [DWCUSTID]        INT IDENTITY(1,1) NOT NULL,
-	 DWSOURCEIDBRIS   INT			NULL, 
-	 DWSOURCEIDMELB   INT			NULL, 
+    [DWCUSTID]        INT IDENTITY(4000,1) NOT NULL,
+	[DWSOURCEIDBRIS]   INT			NULL, 
+	[DWSOURCEIDMELB]   INT			NULL, 
     [FIRSTNAME]       NVARCHAR (30) NULL,
     [SURNAME]         NVARCHAR (30) NULL,
     [GENDER]          NVARCHAR (10) NULL,
@@ -1177,17 +1187,14 @@ GO
     [CITY]			  NVARCHAR (50) NULL,
     [STATE]           NVARCHAR (10) NULL,
     [CUSTCATNAME]     NVARCHAR (30) NULL,
-    
-    --THINK THIS NEEDS TO HAVE A CONSTRAINT TO THE CUSTCATERGORY TABLE WHEN WE INSERT FROM THE BRIS TABLE 
-	--HAS A FOREIGN KEY TO THE CUSTCATEGORY WHICH THEN HAS A NAME
-
+   CONSTRAINT [Pk_dwCust] PRIMARY KEY CLUSTERED ([DWCUSTID] ASC),
 );
 
---DWSALE (DWSALEID, DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY,
---SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+--(4001, 639, NULL, 'Ngan', 'Noah', 'F', 9173601430, 7773, 'Parramatta', 'NSW', 'GENERAL')
+
 
 CREATE TABLE [dbo].[DWSALE] (
-	[DWSALEID]		INT IDENTITY(1,1) NOT NULL,
+	[DWSALEID]		INT IDENTITY(2000,1) NOT NULL,
 	[DWCUSTID]		INT			    NOT NULL,
 	[DWPRODID]		INT				NOT NULL,
 	DWSOURCEIDBRIS	INT				NULL,
@@ -1196,8 +1203,44 @@ CREATE TABLE [dbo].[DWSALE] (
 	SALE_DWDATEID	INT				NULL,
 	SHIP_DWDATEID	INT				NULL, 
 	SALEPRICE		DECIMAL (7, 2)	NULL,
-	--NOT REALLY SURE ABOUT THE IMPLEMENTATION OF THE SALE DATA AND SHIPPING DATE HERE- DOES IT GET ENTERED INTO THE DATE TABLE ???
-   
-    
+	CONSTRAINT [Pk_dwSaleId] PRIMARY KEY CLUSTERED ([DWSALEID] ASC),
+	CONSTRAINT [Pk_dwCustId] foreign KEY([DWCUSTID]) references [DWCUST],
+	CONSTRAINT [Pk_dwProdId] foreign KEY([DWPRODID]) references [DWPROD],
+	CONSTRAINT [Pk_dwSaleDateId] foreign KEY(SALE_DWDATEID) references [dwdate.DateKey],
+	CONSTRAINT [Pk_dwShipDateId] foreign KEY(SHIP_DWDATEID) references [dwdate.DateKey],
 );
 
+--(2001, 4001, 5001, , 639, NULL, 5, 1091, 1091, 1210.10)
+
+GO
+
+DROP TABLE IF EXISTS GENDERSPELLING;
+
+GO
+
+CREATE TABLE GENDERSPELLING (
+
+INVALID_VALUE       VARCHAR(30),
+
+NEW_VALUE           VARCHAR(1) CHECK(NEW_VALUE IN('F', 'M')),
+
+PRIMARY KEY(INVALID_VALUE)
+
+);
+
+
+INSERT INTO GENDERSPELLING(INVALID_VALUE, NEW_VALUE) VALUES
+('MAIL', 'M'),
+('WOMAN', 'W'),
+('FEM', 'F'),
+('FEMALE', 'F'),
+('MALE', 'M'),
+('GENTELMAN', 'M'),
+('MM', 'M'), 
+('FF', 'F'),
+('FEMAIL', 'F');
+
+
+
+-- TASK 2.1
+-- . PRODUCT TRANSFER FILTER 
