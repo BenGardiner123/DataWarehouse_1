@@ -380,9 +380,27 @@ FROM DW1272.dbo.FILTER_#5 F
 --Insert the rows from the CUSTBRIS table that are listed in the ERROREVENT table and have a filterid
 --value =7. 
 
+--where gender is in the spelling table
 INSERT INTO DWCUST(DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
 SELECT Custid, NULL, Fname, Sname, 
-	   (SELECT NEW_VALUE FROM GENDERSPELLING GS WHERE TCB.GENDER = GENDERSPELLING.INVALID_VALUE), Phone, Postcode, City, [State], 
+	   upper((SELECT GS.NEW_VALUE FROM GENDERSPELLING GS WHERE gs.invalid_value = tcb.Gender)), Phone, Postcode, City, [State], 
 	   (SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = TCB.Custcatcode)
 FROM TPS.DBO.CUSTBRIS TCB
-WHERE Custid NOT IN (SELECT SOURCE_ID FROM ERROREVENT WHERE SOURCE_TABLE = 'CUSTBRIS' AND FILTERID = 7)
+WHERE Custid IN (SELECT SOURCE_ID FROM ERROREVENT WHERE SOURCE_TABLE = 'CUSTBRIS' AND FILTERID = 7)
+and TCB.Gender in (select gs2.invalid_value from GENDERSPELLING gs2)
+--where spelling is not in the table or valu is null
+UNION
+SELECT Custid, NULL, Fname, Sname, 'U', Phone, Postcode, City, [State], 
+		(SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = TCB.Custcatcode)
+FROM TPS.DBO.CUSTBRIS TCB
+WHERE Custid IN (SELECT SOURCE_ID FROM ERROREVENT WHERE SOURCE_TABLE = 'CUSTBRIS' AND FILTERID = 7)
+and (TCB.Gender in (select gs2.invalid_value from GENDERSPELLING gs2) or TCB.Gender IS NULL)
+
+--select * 
+--from dwcust
+
+--/
+
+--Task 4.1
+--a) Write code to MERGE rows into the DWCUST table. 
+
