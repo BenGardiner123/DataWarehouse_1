@@ -419,7 +419,6 @@ values (NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State
 --select *
 --from DWCUST dc
 
-
 ----where the fname, surname and postcode matches
 --INSERT INTO DWCUST(DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
 --Select NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State], 
@@ -437,3 +436,18 @@ values (NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State
 --where cm.Fname not in (select dc.FIRSTNAME from DW1272.dbo.dwcust dc)
 --and cm.Sname not in (select dc.SURNAME from DW1272.dbo.dwcust dc)
 --and cm.Postcode not in (select dc.POSTCODE from DW1272.dbo.dwcust dc)
+
+--/
+
+--Task 4.2
+--Testing: You should execute the entire Script.sql file to ensure that all tasks can run without error. 
+
+--/
+
+--Task 5.1
+--Filter #8
+--a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
+--PRODID does not match a DWPROD. DWSOURCEID. The action must be set to 'SKIP'
+--b) Testing: You should test your code and ensure that ERROREVENT have been updated correctly
+
+
