@@ -405,7 +405,7 @@ and (TCB.Gender in (select gs2.invalid_value from GENDERSPELLING gs2) or TCB.Gen
 --a) Write code to MERGE rows into the DWCUST table. 
 
 MERGE DWCUST DW
-USING CUSTMELB CM 
+USING TPS.DBO.CUSTMELB CM 
 ON CM.Fname = DW.FIRSTNAME
 AND CM.Sname = DW.SURNAME
 AND CM.Postcode = DW.POSTCODE
@@ -415,6 +415,10 @@ WHEN NOT MATCHED THEN
 INSERT (DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
 values (NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State], 
 	   (SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = cm.Custcatcode));
+
+--select *
+--from DWCUST dc
+
 
 ----where the fname, surname and postcode matches
 --INSERT INTO DWCUST(DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
