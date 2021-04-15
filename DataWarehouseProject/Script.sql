@@ -404,3 +404,32 @@ and (TCB.Gender in (select gs2.invalid_value from GENDERSPELLING gs2) or TCB.Gen
 --Task 4.1
 --a) Write code to MERGE rows into the DWCUST table. 
 
+MERGE DWCUST DW
+USING CUSTMELB CM 
+ON CM.Fname = DW.FIRSTNAME
+AND CM.Sname = DW.SURNAME
+AND CM.Postcode = DW.POSTCODE
+WHEN MATCHED THEN
+UPDATE SET DW.DWSOURCEIDMELB = CM.CUSTID
+WHEN NOT MATCHED THEN
+INSERT (DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
+values (NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State], 
+	   (SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = cm.Custcatcode));
+
+----where the fname, surname and postcode matches
+--INSERT INTO DWCUST(DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
+--Select NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State], 
+--	   (SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = cm.Custcatcode)
+--from tps.dbo.custmelb cm
+--where cm.Fname in (select dc.FIRSTNAME from DW1272.dbo.dwcust dc)
+--and cm.Sname in (select dc.SURNAME from DW1272.dbo.dwcust dc)
+--and cm.Postcode in (select dc.POSTCODE from DW1272.dbo.dwcust dc)
+
+---- where NOT matches
+--INSERT INTO DWCUST(DWSOURCEIDBRIS, DWSOURCEIDMELB, FIRSTNAME, SURNAME, GENDER, PHONE, POSTCODE, CITY, [STATE], CUSTCATNAME)
+--Select NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State], 
+--	   (SELECT TCC.CUSTCATNAME from tps.dbo.CUSTCATEGORY TCC where TCC.Custcatcode = cm.Custcatcode)
+--from tps.dbo.custmelb cm
+--where cm.Fname not in (select dc.FIRSTNAME from DW1272.dbo.dwcust dc)
+--and cm.Sname not in (select dc.SURNAME from DW1272.dbo.dwcust dc)
+--and cm.Postcode not in (select dc.POSTCODE from DW1272.dbo.dwcust dc)
