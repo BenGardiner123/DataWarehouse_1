@@ -463,3 +463,25 @@ WHERE SB.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID
 
 --\
 
+--Task 5.2
+--Filter #9
+--a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
+--CUSTID does not match a DWCUST. DWSOURCEIDBRIS. The action must be set to 'SKIP' 
+
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEBRIS', 9, (SELECT SYSDATETIME()), 'SKIP'
+FROM TPS.dbo.SALEBRIS SB
+WHERE SB.custid not in (SELECT DWSOURCEIDBRIS from dbo.DWCUST DC where DC.DWSOURCEIDBRIS = SB.custid)
+
+--testing
+
+--select *
+--FROM TPS.dbo.SALEBRIS SB
+--WHERE SB.custid not in (SELECT DWSOURCEIDBRIS from dbo.DWCUST DC where DC.DWSOURCEIDBRIS = SB.custid)
+
+--select * 
+--from ERROREVENT ee
+--where filterid = 9
+
+--/
+
