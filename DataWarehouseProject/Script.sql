@@ -485,3 +485,32 @@ WHERE SB.custid not in (SELECT DWSOURCEIDBRIS from dbo.DWCUST DC where DC.DWSOUR
 
 --/
 
+--Task 5.3
+--Filter #10
+--Task 3.5.5
+--a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
+--SHIPDATE is earlier than SALEDATE. The action must be set to 'MODIFY'
+ 
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEBRIS', 10, (SELECT SYSDATETIME()), 'MODIFY'
+FROM TPS.DBO.SALEBRIS SB
+WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue) < (SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue))
+
+--select * 
+--from ERROREVENT ee
+--where filterid = 10
+
+----testing
+--select *
+--FROM TPS.DBO.SALEBRIS SB
+--WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue) < (SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue))
+
+--/
+
+--Task 5.4
+--Filter #11
+--a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
+--SALEPRICE is Null. The action must be set to 'MODIFY'
+
+
+
