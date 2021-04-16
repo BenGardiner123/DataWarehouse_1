@@ -4,7 +4,7 @@
 --create databsse DW1272
 use DW1272
 
---errorevent table
+--errorevent tableC:\Users\ben_g\Source\Repos\DataWarehouse_1\DataWarehouseProject\Script.sql
 
 
 DROP TABLE if exists ERROREVENT; 
@@ -445,9 +445,21 @@ values (NULL, Custid, Fname, Sname, upper(Gender), Phone, Postcode, City, [State
 --/
 
 --Task 5.1
+
 --Filter #8
 --a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
 --PRODID does not match a DWPROD. DWSOURCEID. The action must be set to 'SKIP'
 --b) Testing: You should test your code and ensure that ERROREVENT have been updated correctly
 
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEBRIS', 8, (SELECT SYSDATETIME()), 'SKIP'
+FROM TPS.dbo.SALEBRIS SB
+WHERE SB.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID = SB.Prodid)
+
+--testing
+--select *
+--FROM TPS.dbo.SALEBRIS SB
+--WHERE SB.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID = SB.Prodid)
+
+--\
 
