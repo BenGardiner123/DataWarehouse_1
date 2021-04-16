@@ -512,5 +512,41 @@ WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue) < (SE
 --a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
 --SALEPRICE is Null. The action must be set to 'MODIFY'
 
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEBRIS', 11, (SELECT SYSDATETIME()), 'MODIFY'
+FROM TPS.DBO.SALEBRIS SB
+WHERE SB.UNITPRICE IS NULL
+
+--SELECT *
+--FROM TPS.DBO.SALEBRIS SB
+--WHERE SB.UNITPRICE IS NULL
+
+--select * 
+--from ERROREVENT ee
+--where filterid = 11
+
+--/
 
 
+--Task 5.5
+--a) Write the code that inserts records from SALEBRIS into DWSALE into the script file. This code
+--must ensure that: 
+--• All rows not listed in the ERROREVENT table are uploaded to DWSALE
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value.
+--The DWSALEID value must be obtained from a the appropriate sequence as created
+--in Part 1
+--• The DWSOURCEIDBRIS value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST
+--table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD
+--table
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate
+--DWDATE.DATEKEY 
+
+
+--SELECT EVERYTHING FROM THE SALEBRIS TABLE THAT ISNT IN THE ERROR TABLE
+
+INSERT INTO DWSALE(DWSALEID, DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+SELECT *
+FROM TPS.DBO.SALEBRIS SB
+WHERE SB.SALEID NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_ID = SB.SALEID)
