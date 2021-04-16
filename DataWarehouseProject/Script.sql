@@ -580,4 +580,21 @@ WHERE SB.SALEID NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_I
 --WHERE SB.SALEID NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_ID = SB.SALEID)
 
 --select *
---from DWCUST	
+--from DWCUST
+
+--/
+
+--Task 5.6
+--a) Write the code that inserts records from SALEBRIS that are listed in ERROREVENT and have a
+--filterid value =10 into DWSALE into the script file.
+--This code must ensure that:
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value. The
+--DWSALEID value must be obtained from a the appropriate sequence as created in Part 1
+--• The DWSOURCEIDBRIS value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD table
+--• MODIFY the SHIPDATE so that it equals the SALEDATE plus 2 days
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate 
+--DWDATE.DATEKEY
+--b) Testing: You should test your code and ensure that DWSALE have been updated correctly. 
+
