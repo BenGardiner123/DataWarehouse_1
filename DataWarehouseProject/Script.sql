@@ -756,12 +756,84 @@ WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.SHIPDATE = DD.datevalue) < (SE
 --correctly. 
 
 
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 15, (SELECT SYSDATETIME()), 'MODIFY'
+FROM TPS.DBO.SALEMELB SM
+WHERE SM.UNITPRICE IS NULL
 
 
+----TESTING = 8
+--SELECT *
+--FROM TPS.DBO.SALEMELB SM
+--WHERE SM.UNITPRICE IS NULL
 
-
-
-
-
+--SELECT * = 8 
+--FROM ERROREVENT
+--WHERE FILTERID = 15
 
 --/
+
+
+--Task 6.5
+--1. a) Write the code that inserts records from SALEMELB into DWSALE into the script file. This
+--code must ensure that:
+--• All rows not listed in the ERROREVENT table are uploaded to DWSALE
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value.
+--The DWSALEID value must be obtained from a the appropriate sequence as created
+--in Part 1
+--• The DWSOURCEIDMELB value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST
+--table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD
+--table
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate
+--DWDATE.DATEKEY
+--2. b) Testing: You should test your code and ensure that DWSALE have been updated
+--correctly. 
+
+INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+SELECT 
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SM.CUSTID = DC.DWSOURCEIDBRIS), 
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SM.PRODID = DP.DWSOURCEID),
+NULL,
+(SM.SALEID),  
+SM.QTY, 
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.saledate = DD.datevalue), 
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.SHIPDATE = DD.datevalue), 
+SM.UNITPRICE
+FROM TPS.DBO.SALEMELB SM
+WHERE SM.SALEID NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_ID = SM.SALEID)
+
+
+
+--Task 6.6
+--a) Write the code that inserts records from SALEMELB that are listed in ERROREVENT and have a
+--filterid value =14 into DWSALE into the script file.
+--This code must ensure that:
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value. The
+--DWSALEID value must be obtained from a the appropriate sequence as created in Part 1
+--• The DWSOURCEIDMELB value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD table
+--• MODIFY the SHIPDATE so that it equals the SALEDATE plus 2 days
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate
+--DWDATE.DATEKEY
+--b) Testing: You should test your code and ensure that DWSALE have been updated correctly.
+
+INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+SELECT 
+--AS DWCUSTID
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SM.CUSTID = DC.DWSOURCEIDMELB),
+--AS DWPRODID
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SM.PRODID = DP.DWSOURCEID),
+NULL,
+--AS MELBSOUCEID
+(SM.SALEID), 
+SM.QTY, 
+--AS SALEDATE
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.saledate = DD.datevalue), 
+--AS SHIPDATE
+((SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.saledate = DD.datevalue) + 2), 
+SM.UNITPRICE
+FROM TPS.DBO.SALEMELB SM
+WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEMELB' AND FILTERID = 14)
