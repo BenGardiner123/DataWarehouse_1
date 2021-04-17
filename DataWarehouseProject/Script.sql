@@ -673,3 +673,51 @@ WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE
 
 --/
 
+--Task 6.1
+--Filter #12
+--1. a) Write code to insert a row into the ERROREVENT table for each row in the SALEMELB
+--table where PRODID does not match a DWPROD. DWSOURCEID. The action must be set to
+--'SKIP'
+--2. b) Testing: You should test your code and ensure that ERROREVENT have been updated
+--correctly. 
+
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 12, (SELECT SYSDATETIME()), 'SKIP'
+FROM TPS.dbo.SALEMELB SM
+WHERE SM.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID = SM.Prodid)
+
+--testing
+--select *
+--FROM TPS.dbo.SALEMELB SM
+--WHERE SM.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID = SM.Prodid)
+
+--select * 
+--from ERROREVENT ee
+--where filterid = 12
+
+--\
+
+
+---Task 6.2
+--Filter #13
+--1. a) Write code to insert a row into the ERROREVENT table for each row in the SALEMELB
+--table where CUSTID does not match a DWCUST. DWSOURCEIDMELB. The action must be set
+--to 'SKIP'
+--2. b) Testing: You should test your code and ensure that ERROREVENT have been updated
+--correctly. 
+
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 13, (SELECT SYSDATETIME()), 'SKIP'
+FROM TPS.dbo.SALEMELB SM
+WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid)
+
+--testing
+
+--select *
+--FROM TPS.dbo.SALEMELB SM
+--WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid)
+
+
+--select * 
+--from ERROREVENT ee
+--where filterid = 13
