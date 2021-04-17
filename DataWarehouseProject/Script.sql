@@ -601,13 +601,18 @@ WHERE SB.SALEID NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_I
 
 INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
 SELECT 
-(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SB.CUSTID = DC.DWSOURCEIDBRIS) AS DWCUSTID, 
-(SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID) AS DWPRODID,
+--AS DWCUSTID
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SB.CUSTID = DC.DWSOURCEIDBRIS),
+--AS DWPRODID
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID),
 (SB.SALEID), 
-NULL AS MELBSOUCEID, 
+--AS MELBSOUCEID
+NULL, 
 SB.QTY, 
-(SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue) AS SALEDATE, 
-((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue) + 2) AS SHIPDATE, 
+--AS SALEDATE
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue), 
+--AS SHIPDATE
+((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue) + 2), 
 SB.UNITPRICE
 FROM TPS.DBO.SALEBRIS SB
 WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEBRIS' AND FILTERID = 10)
@@ -622,4 +627,42 @@ WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE
 --SELECT COUNT(*)
 --FROM ERROREVENT 
 --WHERE FILTERID = 10
+
+--/
+
+--Task 5.7
+--a) Write the code that inserts records from SALEBRIS that are listed in ERROREVENT and have filterid
+--value = 11 into DWSALE into the script file.
+--This code must ensure that:
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value. The
+--DWSALEID value must be obtained from a the appropriate sequence as created in Part 1
+--• The DWSOURCEIDBRIS value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD table
+--• MODIFY the SALEPRICE so that it equals the maximum sale price for that product in
+--SALEBRIS
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate
+--DWDATE.DATEKEY
+--b) Testing: You should test your code and ensure that DWSALE table have been updated correctly.
+--Task 5.8
+--Testing: You should execute the entire Script.sql file to ensure that all tasks can run without error. 
+
+INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+SELECT 
+--AS DWCUSTID
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SB.CUSTID = DC.DWSOURCEIDBRIS),
+--AS DWPRODID
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID),
+SB.SALEID, 
+--AS MELBSOUCEID
+NULL, 
+SB.QTY, 
+--AS SALEDATE
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.saledate = DD.datevalue),  
+--AS SHIPDATE
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue),  
+--max unit price from the salebris table
+(select sb.unitprice from tps.dbo.salebris where unitprice = (select max(SB.UNITPRICE) from tps.dbo.salebris))
+FROM TPS.DBO.SALEBRIS SB
+WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEBRIS' AND FILTERID = 11)
 
