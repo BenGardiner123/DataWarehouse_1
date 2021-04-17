@@ -721,3 +721,47 @@ WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOUR
 --select * 
 --from ERROREVENT ee
 --where filterid = 13
+
+--/
+
+--Task 6.3
+--Filter #14
+--1. a) Write code to insert a row into the ERROREVENT table for each row in the SALEMELB
+--table where SHIPDATE is earlier than SALEDATE. The action must be set to 'MODIFY'
+--2. b) Testing: You should test your code and ensure that ERROREVENT have been updated
+--correctly.
+
+
+INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
+SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 14, (SELECT SYSDATETIME()), 'MODIFY'
+FROM TPS.DBO.SALEMELB SM
+WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.SHIPDATE = DD.datevalue) < (SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.saledate = DD.datevalue))
+
+
+----TESTING
+--SELECT *
+--FROM ERROREVENT 
+--WHERE FILTERID = 14
+
+
+
+--/
+
+
+--Task 6.4
+--Filter #15
+--1. a) Write code to insert a row into the ERROREVENT table for each row in the SALEMELB
+--table where SALEPRICE is Null. The action must be set to 'MODIFY'
+--2. b) Testing: You should test your code and ensure that ERROREVENT have been updated
+--correctly. 
+
+
+
+
+
+
+
+
+
+
+--/
