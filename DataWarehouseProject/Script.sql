@@ -662,14 +662,16 @@ SB.QTY,
 --AS SHIPDATE
 (SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue),  
 --max unit price from the salebris table
-(select max(SB.unitprice) from tps.dbo.salebris SB where sb.prodid = (SELECT DP.DWSOURCEID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID))
+--not working
+(select MAX(sb.Unitprice) from tps.dbo.SALEBRIS SB where sb.Saleid = (SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID ))
 FROM TPS.DBO.SALEBRIS SB
 WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEBRIS' AND FILTERID = 11)
 
 
---select *
---from DWSALE
---where saleprice is null
+select MAX(Unitprice) as unitprice, prodid
+from tps.dbo.SALEBRIS
+where Prodid = 10743 
+group by Prodid
 
 --/
 
