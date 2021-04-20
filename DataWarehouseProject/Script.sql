@@ -688,6 +688,7 @@ SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 12
 FROM TPS.dbo.SALEMELB SM
 WHERE SM.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID = SM.Prodid)
 
+
 --testing
 --select *
 --FROM TPS.dbo.SALEMELB SM
@@ -716,14 +717,14 @@ OR sm.custid is null
 
 --testing
 
-select *
-FROM TPS.dbo.SALEMELB SM
-WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid) and sm.Custid is not null
+--select *
+--FROM TPS.dbo.SALEMELB SM
+--WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid) and sm.Custid is not null
 
 
-select * 
-from ERROREVENT ee
-where filterid = 13
+--select * 
+--from ERROREVENT ee
+--where filterid = 13
 
 --/
 
@@ -855,16 +856,16 @@ WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE
 --FROM TPS.DBO.SALEMELB SM
 --WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEMELB' AND FILTERID = 14)
 
-SELECT *
-FROM TPS.DBO.SALEMELB SM
-where sm.Saleid in (10762, 
-10898)
+--SELECT *
+--FROM TPS.DBO.SALEMELB SM
+--where sm.Saleid in (10762, 
+--10898)
 
 
-SELECT *
-FROM DWCUST
-where DWSOURCEIDMELB in (705,
-451)
+--SELECT *
+--FROM DWCUST
+--where DWSOURCEIDMELB in (705,
+--451)
 
 
 
