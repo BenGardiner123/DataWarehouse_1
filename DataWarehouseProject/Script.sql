@@ -511,19 +511,20 @@ WHERE ((SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue) < (SE
 --Filter #11
 --a) Write code to insert a row into the ERROREVENT table for each row in the SALEBRIS table where
 --SALEPRICE is Null. The action must be set to 'MODIFY'
-
+begin transaction
 INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
 SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEBRIS', 11, (SELECT SYSDATETIME()), 'MODIFY'
 FROM TPS.DBO.SALEBRIS SB
 WHERE SB.UNITPRICE IS NULL
-
+commit transaction
+GO
 --SELECT *
 --FROM TPS.DBO.SALEBRIS SB
 --WHERE SB.UNITPRICE IS NULL
 
---select * 
---from ERROREVENT ee
---where filterid = 11
+select * 
+from ERROREVENT ee
+where filterid = 11
 
 --/
 
@@ -650,9 +651,9 @@ WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE
 INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
 SELECT 
 --AS DWCUSTID
-(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SB.CUSTID = DC.DWSOURCEIDBRIS),
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SB.CUSTID = DC.DWSOURCEIDBRIS and DC.DWSOURCEIDBRIS is not null),
 --AS DWPRODID
-(SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID),
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID and dp.DWSOURCEID is not null),
 SB.SALEID, 
 --AS MELBSOUCEID
 NULL, 
@@ -662,16 +663,15 @@ SB.QTY,
 --AS SHIPDATE
 (SELECT dd.DATEKEY FROM dwDATE DD WHERE SB.SHIPDATE = DD.datevalue),  
 --max unit price from the salebris table
---not working
-(select MAX(sb.Unitprice) from tps.dbo.SALEBRIS SB where sb.Saleid = (SELECT DP.DWPRODID FROM DWPROD DP WHERE SB.PRODID = DP.DWSOURCEID ))
+(select max(unitprice) from TPS.dbo.salebris sb2 where sb2.prodid  = sb.Prodid )
 FROM TPS.DBO.SALEBRIS SB
 WHERE SB.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEBRIS' AND FILTERID = 11)
 
 
-select MAX(Unitprice) as unitprice, prodid
-from tps.dbo.SALEBRIS
-where Prodid = 10743 
-group by Prodid
+--select MAX(Unitprice) as unitprice, prodid
+--from tps.dbo.SALEBRIS
+--where Prodid = 10743 
+--group by Prodid
 
 --/
 
@@ -711,18 +711,19 @@ WHERE SM.prodid not in (SELECT DWSOURCEID from dbo.DWPROD DP where DP.DWSOURCEID
 INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [ACTION])
 SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 13, (SELECT SYSDATETIME()), 'SKIP'
 FROM TPS.dbo.SALEMELB SM
-WHERE SM.custid not in (SELECT DC.DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid) 
+WHERE SM.custid not in (SELECT DC.DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid)
+OR sm.custid is null
 
 --testing
 
---select *
---FROM TPS.dbo.SALEMELB SM
---WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid)
+select *
+FROM TPS.dbo.SALEMELB SM
+WHERE SM.custid not in (SELECT DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid) and sm.Custid is not null
 
 
---select * 
---from ERROREVENT ee
---where filterid = 13
+select * 
+from ERROREVENT ee
+where filterid = 13
 
 --/
 
