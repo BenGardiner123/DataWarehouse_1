@@ -522,9 +522,9 @@ GO
 --FROM TPS.DBO.SALEBRIS SB
 --WHERE SB.UNITPRICE IS NULL
 
-select * 
-from ERROREVENT ee
-where filterid = 11
+--select * 
+--from ERROREVENT ee
+--where filterid = 11
 
 --/
 
@@ -713,7 +713,8 @@ INSERT INTO ERROREVENT(ERRORID, SOURCE_ID, SOURCE_TABLE, FILTERID, [DATETIME], [
 SELECT NEXT VALUE FOR ERRORID_SEQ, CONVERT(NVARCHAR(50), Saleid), 'SALEMELB', 13, (SELECT SYSDATETIME()), 'SKIP'
 FROM TPS.dbo.SALEMELB SM
 WHERE SM.custid not in (SELECT DC.DWSOURCEIDMELB from dbo.DWCUST DC where DC.DWSOURCEIDMELB = SM.custid)
-OR sm.custid is null
+OR SM.custid is null
+
 
 --testing
 
@@ -848,6 +849,7 @@ SM.QTY,
 SM.UNITPRICE
 FROM TPS.DBO.SALEMELB SM
 WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEMELB' AND FILTERID = 14)
+AND SM.Saleid NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE='SALEMELB' GROUP BY EE.SOURCE_ID HAVING COUNT(*) > 1)
 
 
 
@@ -864,16 +866,73 @@ WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE
 
 --SELECT *
 --FROM DWCUST
---where DWSOURCEIDMELB in (705,
---451)
+--where DWSOURCEIDMELB is NULL
+--AND DWSOURCEIDBRIS IS NULL
+
+
+--Task 6.7
+--a) Write the code that inserts records from SALEMELB that are listed in ERROREVENT and have a
+--filterid value =15 into DWSALE into the script file.
+--This code must ensure that:
+--• Each new sale added to the DWSALE table must be given unique DWSALEID value. The
+--DWSALEID value must be obtained from a the appropriate sequence as created in Part 1
+--• The DWSOURCEIDMELB value must be set to the SALEID of the source table
+--• The DWCUSTID value must be set to the appropriate DWCUSTID of the DWCUST table
+--• The DWPRODID value must be set to the appropriate DWPRODID of the DWPROD table
+--• MODIFY the SALEPRICE so that it equals the maximum sale price for that product in
+--SALEMELB
+--• SALE_DWDATEID, SHIP_DWDATEID in DWSALE must be set to the appropriate
+--DWDATE.DATEKEY
+--b) Testing: You should test your code and ensure that DWSALE table have been updated correctly.
+--Task 6.8
+--Testing: You should execute the entire Script.sql file to ensure that all tasks can run without error. 
+
+INSERT INTO DWSALE(DWCUSTID, DWPRODID, DWSOURCEIDBRIS, DWSOURCEIDMELB, QTY, SALE_DWDATEID, SHIP_DWDATEID, SALEPRICE)
+SELECT 
+--AS DWCUSTID
+(SELECT DC.DWCUSTID FROM DWCUST DC WHERE SM.CUSTID = DC.DWSOURCEIDMELB),
+--AS DWPRODID
+(SELECT DP.DWPRODID FROM DWPROD DP WHERE SM.PRODID = DP.DWSOURCEID),
+NULL,
+--AS MELBSOUCEID
+(SM.SALEID), 
+SM.QTY, 
+--as saledate
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.saledate = DD.datevalue), 
+--as shipdate
+(SELECT dd.DATEKEY FROM dwDATE DD WHERE SM.SHIPDATE = DD.datevalue), 
+--max unit price from the salebris table
+(select max(unitprice) from TPS.dbo.salemelb sm2 where sm2.prodid  = sm.Prodid) 
+FROM TPS.DBO.SALEMELB SM
+WHERE SM.SALEID IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE = 'SALEMELB' AND FILTERID = 15)
+AND SM.Saleid NOT IN (SELECT EE.SOURCE_ID FROM ERROREVENT EE WHERE EE.SOURCE_TABLE='SALEMELB' GROUP BY EE.SOURCE_ID HAVING COUNT(*) > 1)
 
 
 
---SELECT *
---DC.DWCUSTFROM DWCUST DC WHERE SM.CUSTID = DC.DWSOURCEIDMELB),
 
---10762
---10898
 
---705
---451
+
+
+
+--PART 7. Task 7.1
+--a) Until now no source data row has failed multiple filters, however some rows in SALEMELB do. No
+--row that fails multiple filters is to be present in the DWSALE table. Modify your script so that this
+--does not happen.
+--b) Testing: You should test your code and ensure that DWSALE table have been updated correctly. 
+
+
+SELECT * FROM ERROREVENT WHERE SOURCE_ID IN
+(
+	SELECT EE.SOURCE_ID
+	FROM ERROREVENT EE GROUP BY EE.SOURCE_ID HAVING COUNT(*) > 1 
+);
+
+
+
+
+--PART 8 QUERIES
+--Write SQL queries based on your data warehouse to display the following information.
+--Note: The values used to create these examples will not match current values in the database tables. 
+
+--1 LIST EACH WEEKDAY AND THE TOTAL SALES (QTY * SALEPRICE) IN DESC TOTAL SEQ
+SELECT (SELECT dd.DayOfWeek FROM dwDATE DD) AS WEEKDAY, COUNT(*) AS "TOTAL SALES" 
